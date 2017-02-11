@@ -1,40 +1,44 @@
+extern crate regex;
+use regex::Regex;
+
 fn main() {
-    let tests = [
+    let tests: &[&str] = &[
         "s/sed/potato",
         "/s/sed/potato"
+    ][..];
+
+    let delimiters = [
+        ("/s/", "s/")
     ];
 
-    let char_iter = tests[0].char_indices();
-
-    let stage = 0;
-
-    for (index, chara) in char_iter {
-        match chara {
-            '/' => {
-                if index == 0 {
-                    stage = 1;
-                } else if (index == 1 || index == 2) && stage == 2 {
-                    if 
-                } else {
-                    stage = -1;
-                    break;
+    for &(b1, b2) in delimiters[..].iter() {
+        for string in tests {
+            if string.starts_with(b1) || string.starts_with(b2) {
+                let boundaries = get_boundaries(string);
+                for i in 0 .. (boundaries.len() - 1) {
+                    println!("{:?}", &string[boundaries[i]..boundaries[i+1]]);
                 }
-            },
-            's' => {
-                if index == 0 || (index == 1 && stage == 1) {
-                    stage = 2;
-                } else {
-                    stage = -1;
-                    break;
-                }
-            }
+            } 
         }
-    } // what am I even doing here
+    }
 }
 
-fn get_boundaries(char_iter: &str::CharIndices, ) {
-    let middle = 0;
-    while let Some(chara) = char_iter.next() {
+// I probably shouldnt be returning a Vec *shrug*
 
+fn get_boundaries(string: &str) -> Vec<i64> {
+    let mut boundaries: Vec<i64> = Vec::new();
+    let mut previous_char = '/';
+
+    for (index,cha) in string.char_indices() {
+        match cha {
+            '/' => {
+                if previous_char != '\\' {
+                    boundaries.push(index as i64);
+                }
+            }
+            _ => previous_char = cha
+        }
     }
+
+    boundaries
 }
