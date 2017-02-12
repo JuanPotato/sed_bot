@@ -62,8 +62,8 @@ fn handle_message(bot: Arc<BotApi>, message: Message) {
         return;
     }
 
-    let from = message.from.unwrap();
     let msg_text = message.text.unwrap();
+    let reply_msg_id = reply_msg.message_id;
     let reply_msg_text = reply_msg.text.unwrap();
 
     if msg_text.starts_with("s/") || msg_text.starts_with("/s/") {
@@ -83,13 +83,13 @@ fn handle_message(bot: Arc<BotApi>, message: Message) {
                         let after = result.replace_all(&reply_msg_text, to.as_str());
                         let _ = bot.send_message(&args::SendMessage
                             ::new(&after.into_owned())
-                            .chat_id(from.id)
-                            .reply_to_message_id(message.message_id));
+                            .chat_id(message.chat.id)
+                            .reply_to_message_id(reply_msg_id));
                     }
                     Err(err) => {
                         let _ = bot.send_message(&args::SendMessage
                             ::new(&err.to_string())
-                            .chat_id(from.id)
+                            .chat_id(message.chat.id)
                             .reply_to_message_id(message.message_id));
                     }
                 }
@@ -97,7 +97,7 @@ fn handle_message(bot: Arc<BotApi>, message: Message) {
             _ => {
                 let _ = bot.send_message(&args::SendMessage
                     ::new("Invalid number of delimiters!")
-                    .chat_id(from.id)
+                    .chat_id(message.chat.id)
                     .reply_to_message_id(message.message_id));
             }
         }
