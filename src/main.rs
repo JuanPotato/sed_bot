@@ -17,7 +17,7 @@ fn main() {
 
     let mut update_args = args::GetUpdates::new().timeout(600).offset(0);
 
-    'update_loop: loop {
+    loop {
         let res_updates = bot_arc.get_updates(&update_args);
 
         match res_updates {
@@ -109,15 +109,15 @@ fn get_boundaries(string: &str) -> Vec<usize> { // Better than regex
     let mut previous_char = '/';
 
     for (index,cha) in string.char_indices() {
-        match cha {
-            '/' => {
-                if previous_char != '\\' {
-                    boundaries.push(index);
-                }
-            }
-            _ => {}
+        if '/' == cha && previous_char != '\\' {
+            boundaries.push(index);
         }
+
         previous_char = cha;
+        
+        if cha == '\\' && previous_char == '\\' {
+            previous_char = ' ';
+        }
     }
 
     if boundaries[0] == 0 {
