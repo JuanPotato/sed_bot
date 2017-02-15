@@ -13,7 +13,8 @@ use std::env;
 
 fn main() {
     let token = &env::var("TOKEN").expect("No bot token provided, please set the environment variable TOKEN");
-    let bot_arc = Arc::new(BotApi::new_debug(token));
+    let bot_arc = Arc::new(BotApi::new(token));
+    let admin_id = 0123456789;
 
     let mut update_args = args::GetUpdates::new().timeout(600).offset(0);
 
@@ -37,7 +38,8 @@ fn main() {
             Err(err) => {
                 let _ = bot_arc.send_message(&args::SendMessage
                     ::new(&format!("`{}`", err.to_string()))
-                    .chat_id(82725741));
+                    .chat_id(admin_id)
+                    .parse_mode("Markdown"));
             }
         }
     }
