@@ -16,7 +16,7 @@ fn main() {
     let bot_arc = Arc::new(BotApi::new(token));
     let admin_id = 0123456789;
 
-    let mut update_args = args::GetUpdates::new().timeout(600).offset(0);
+    let mut update_args = args::GetUpdatesBuilder::default().timeout(600).offset(0).build().unwrap();
 
     loop {
         let res_updates = bot_arc.get_updates(&update_args);
@@ -36,10 +36,12 @@ fn main() {
                 }
             }
             Err(err) => {
-                let _ = bot_arc.send_message(&args::SendMessage
-                    ::new(&format!("`{}`", err.to_string()))
+                let new_msg = args::SendMessageBuilder::default()
+                    .text(format!("`{}`", err.to_string()))
                     .chat_id(admin_id)
-                    .parse_mode("Markdown"));
+                    .parse_mode(String::from("Markdown")).build().unwrap();
+
+                let _ = bot_arc.send_message(&new_msg);
             }
         }
     }
@@ -83,24 +85,35 @@ fn handle_message(bot: Arc<BotApi>, message: Message) {
                 match re {
                     Ok(result) => {
                         let after = result.replace_all(&reply_msg_text, to.as_str());
-                        let _ = bot.send_message(&args::SendMessage
-                            ::new(&after.into_owned())
+
+                        let new_msg = args::SendMessageBuilder::default()
+                            .text(after.into_owned())
                             .chat_id(message.chat.id)
-                            .reply_to_message_id(reply_msg_id));
+                            .reply_to_message_id(reply_msg_id)
+                            .build().unwrap();
+                        
+                        let _ = bot.send_message(&new_msg);
                     }
+
                     Err(err) => {
-                        let _ = bot.send_message(&args::SendMessage
-                            ::new(&err.to_string())
+                        let new_msg = args::SendMessageBuilder::default()
+                            .text(err.to_string())
                             .chat_id(message.chat.id)
-                            .reply_to_message_id(message.message_id));
+                            .reply_to_message_id(message.message_id)
+                            .build().unwrap();
+
+                        let _ = bot.send_message(&new_msg);
                     }
                 }
             }
             _ => {
-                let _ = bot.send_message(&args::SendMessage
-                    ::new("Invalid number of delimiters!")
+                let new_msg = args::SendMessageBuilder::default()
+                    .text("Invalid number of delimiters!")
                     .chat_id(message.chat.id)
-                    .reply_to_message_id(message.message_id));
+                    .reply_to_message_id(message.message_id)
+                    .build().unwrap();
+                    
+                let _ = bot.send_message(&new_msg);
             }
         }
     }  
